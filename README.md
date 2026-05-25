@@ -32,7 +32,15 @@ Extract the XML from your `.gno` file first (it's just a ZIP):
 unzip YourFamilyTree.gno
 ```
 
-This produces `Data.xml`. Then run the converter:
+This extracts the archive contents, which may land in a subdirectory. Look
+for `Data.xml` — it may be at the root or inside a folder. Alternatively,
+extract it directly to the current directory:
+
+```bash
+unzip -p YourFamilyTree.gno Data.xml > Data.xml
+```
+
+Then run the converter:
 
 ```bash
 python3 convert.py Data.xml YourFamilyTree.ged
@@ -56,7 +64,7 @@ Drop the resulting `.ged` file into your genealogy software via its
 | `<Educations>` ref | `1 EDUC` | Resolved through `Educations` table |
 | `<Contacts>` Telephone | `1 PHON` | |
 | `<Contacts>` Email | `1 EMAIL` | |
-| `<custom_tag1>` | `1 NOTE` | Multi-line text split with CONT |
+| `<custom_tag1>` | `1 NOTE` | Multi-line text split with CONT — project-specific field, unlikely to appear in most `.gno` files |
 | `<Family>` | `FAM` | |
 | `PedigreeLink Parent` | `HUSB` or `WIFE` | Assigned by the individual's sex |
 | `PedigreeLink Biological` | `CHIL` | |
@@ -73,6 +81,12 @@ two parents, or (rare) same-sex parents gracefully.
 `<First>` with no `<Last>` value. The converter preserves the full
 given name and only emits a `SURN` line when an explicit surname exists.
 
+**Death and marriage events are not converted.** GenoPro records
+`<Death>` dates/places and `<Marriage>` data on family records, but the
+converter does not yet emit `DEAT` or `MARR` GEDCOM tags. This is the
+most significant missing feature — if you need these, see Contributing
+below.
+
 **Layout data is dropped.** GenoPro stores x/y coordinates for every
 individual to render the chart. GEDCOM has no equivalent, so the visual
 layout you originally drew is not preserved. Your importing program
@@ -85,8 +99,7 @@ you need it.
 
 ## Output validation
 
-The output passes round-trip parsing with `ged4py` and structural lint
-against the GEDCOM 5.5.1 grammar:
+The output is structured to satisfy the GEDCOM 5.5.1 grammar:
 
 - Every cross-reference resolves
 - No line exceeds the 255-character limit
